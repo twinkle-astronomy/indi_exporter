@@ -19,7 +19,11 @@ RUN groupadd -g ${GROUP_ID} ${USER} && \
 RUN chown ${USER}:${USER} /app
 USER ${USER}
 
-FROM dev as builder
+FROM dev as tester
+COPY . /app
+RUN cargo build --release --all-targets
+
+FROM tester as builder
 COPY . /app
 RUN cargo install --path .
 

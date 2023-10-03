@@ -33,11 +33,11 @@ jobs:
       
       - name: Build tests
         run: |
-          docker build --target dev -t tests .
+          docker build --target tester -t tester .
 
       - name: Run tests
         run: |
-          docker run tests cargo test
+          docker run tester cargo test --release
   
       - name: Build release
         run: |
