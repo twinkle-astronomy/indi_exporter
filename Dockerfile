@@ -1,11 +1,12 @@
 FROM rust:1.72-buster as dev
 
-RUN apt-get update && apt-get install -y --no-install-recommends libcfitsio-dev libopencv-dev clang libclang-dev && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libcfitsio-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir /app
 ENV HOME="/app"
 WORKDIR /app
-
 
 #This user schenanigans allows for local development
 ARG USER=app
@@ -18,17 +19,10 @@ RUN groupadd -g ${GROUP_ID} ${USER} && \
 RUN chown ${USER}:${USER} /app
 USER ${USER}
 
-from dev as phd2_exporter_builder
+FROM dev as builder
 COPY . /app
-RUN rustup target add x86_64-unknown-linux-musl
-RUN cargo install --target x86_64-unknown-linux-musl --path ./phd2_exporter
+RUN cargo install --path .
 
-from dev as indi_exporter_builder
-COPY . /app
-RUN cargo install --path ./indi_exporter
+FROM debian:bullseye-slim as release
+COPY --from=builder /usr/local/cargo/bin/indi_exporter /usr/local/bin/
 
-FROM debian:bullseye-slim as indi_exporter-release
-COPY --from=indi_exporter_builder /usr/local/cargo/bin/indi_exporter /usr/local/bin/
-
-FROM scratch as phd2_exporter-release
-COPY --from=phd2_exporter_builder /usr/local/cargo/bin/phd2_exporter /usr/local/bin/phd2_exporter

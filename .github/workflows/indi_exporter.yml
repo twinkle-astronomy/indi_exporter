@@ -1,12 +1,12 @@
-name: Create and publish a indi_server docker image
+name: Create and publish a indi_exporter docker image
 
 on:
   push:
-    tags: ['v*']
-    paths: ['indi_server/**']
+    tags:
+      - 'v*'
 
 env:
-  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/indi_server
+  IMAGE_NAME: ghcr.io/${{ github.repository }}
   VERSION: $GITHUB_REF_NAME
 
 jobs:
@@ -30,10 +30,18 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-        
+      
+      - name: Build tests
+        run: |
+          docker build --target dev -t tests .
+
+      - name: Run tests
+        run: |
+          docker run tests cargo test
+  
       - name: Build release
         run: |
-          docker build -t ${{ env.IMAGE_NAME }}:latest .
+          docker build --target release -t ${{ env.IMAGE_NAME }}:latest .
           docker tag ${{ env.IMAGE_NAME }}:latest ${{ env.IMAGE_NAME }}:${{ env.VERSION }}
 
       - name: Publish

@@ -1,14 +1,11 @@
-[workspace]
-resolver = "2"
+[package]
+name = "indi_exporter"
+version = "0.1.0"
+edition = "2021"
 
-members = [
-	"client",
-	"indi",
-	"indi_exporter",
-	"phd2",
-	"twinkle",
-	"fits_inspect",
-]
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[profile.dev.package.fits_inspect]
-opt-level=3
+[dependencies]
+indi = "3.0.1"
+prometheus = "0.13.3"
+prometheus_exporter = "0.8.5"
