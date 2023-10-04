@@ -27,6 +27,10 @@ FROM tester as builder
 COPY . /app
 RUN cargo install --path .
 
-FROM debian:bullseye-slim as release
-COPY --from=builder /usr/local/cargo/bin/indi_exporter /usr/local/bin/
+FROM debian:buster-slim as release
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libcfitsio-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /usr/local/cargo/bin/ /usr/local/bin/
 
